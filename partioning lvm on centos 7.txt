@@ -1,0 +1,129 @@
+PARTITION MANAGEMENT (LVM) 
+
+ 
+
+1. df -h = shows you the already mounted drive 
+
+2. lsblk =shows you all the volumes/block available on the sever 
+
+3. fdisk =  To initialise the volume 
+
+4. To add another drive (/dev/sdb) so as to start partitioning, firstly you if it is hypervisor-1, you dont need to turn off the server. But with hypervisor-2, you might need to turn off the sever, so as to to add the drive. > go to settings on your virtual box > storage> controller SATA> hard disk >create> then choose 
+
+5. lsblk = Shows you the block/volume 
+
+6. fdisk /dev/sdb = to initialize => you will see the following display 
+
+ Welcome to fdisk (util-linux 2.23.2). 
+
+ 
+
+Changes will remain in memory only, until you decide to write them. 
+
+Be careful before using the write command. 
+
+ 
+
+Device does not contain a recognized partition table 
+
+Building a new DOS disklabel with disk identifier 0x48bdf5d2. 
+
+7. n =  to create new partitionn 
+
+8. p = primary partition 
+
+9. 1 = partion number 1, the press enter 
+
+10. +4G = means you want to partition the first drive to be 4G 
+
+11. p = print partition table 
+
+12. t = to give it an LVM id number 
+
+13. type 8e and press enter  = that change the default ID no to LVM ID no 
+
+14. To see if the partition ID is changed, you type P, then enter 
+
+15. To write/save = Type “w” then enter. 
+
+16. Repeat number 7-15 to create several partition 
+
+NOW, we start the process of creating logical volume 
+
+ 
+
+17. pvcreate = to create a physical volume=  pvcreate /dev/sdb1 /dev/sdb2 /dev/sdb3 (if dont do pvcreate, you wount be able to add them all as volume-group 
+
+ You will see below prompt. 
+
+  
+
+Physical volume "/dev/sdb1" successfully created. 
+
+  Physical volume "/dev/sdb2" successfully created. 
+
+  Physical volume "/dev/sdb3" successfully created. 
+
+ 
+
+Now we create a volume group 
+
+18. vgcreate= to create volume group = for instance you want to create volume group of 5G and name the volume “artdata”, then type the following command.= vgcreate artdata /dev/sdb1 devsdb3  
+
+You will see the followin message  
+
+ Volume group "artdata" successfully created 
+
+To check physical volume=pvs 
+
+ 
+
+19. To check volume group= vgs 
+
+ 
+
+Now we create a Logical volume  
+
+ 
+
+20. lvcreate -L +3G -n lv_data artdata ( lvcreate (-L=argument to create LV) (+3G size you inted to give the logical volume) (-n= Name you intend to give the logical volume) (lv_data= Name of the logical volume) (artdata= The volume group which the logica volume will be created from) 
+
+ 
+
+You will see the following message  
+
+ Logical volume "lv_data" created. 
+
+21. To check the logival volume = lvs 
+
+ 
+
+Now for you to be able to use the logical volume created, you need to add a file system to it. 
+
+ 
+
+22. To make it an xfs-file system, you type the following command= mkfs.xfs /dev/artdata/lv_data or mkfs -t xfs /dev/artdata/lv_data 
+
+ 
+
+You will see the following display 
+
+  isize=512    agcount=4, agsize=196608 blks 
+
+         =                       sectsz=512   attr=2, projid32bit=1 
+
+         =                       crc=1        finobt=0, sparse=0 
+
+data     =                       bsize=4096   blocks=786432, imaxpct=25 
+
+         =                       sunit=0      swidth=0 blks 
+
+naming   =version 2              bsize=4096   ascii-ci=0 ftype=1 
+
+log      =internal log           bsize=4096   blocks=2560, version=2 
+
+         =                       sectsz=512   sunit=0 blks, lazy-count=1 
+
+realtime =none                   extsz=4096   blocks=0, rtextents=0 
+
+ 
